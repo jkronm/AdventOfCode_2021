@@ -1,0 +1,127 @@
+package com.company;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
+import java.util.stream.Collectors;
+
+public class Main {
+
+    public static void main(String[] args) {
+        try {
+            File myObj = new File(
+                    "/home/bubba/Desktop/AdventOfCode/src/com/company/Day4.in");
+
+            Scanner line = new Scanner(myObj);
+
+            // build a string/array for numbers called
+            String[] numbersCalledString;
+            List<Integer> numbersCalledList = new ArrayList<Integer>();
+
+            numbersCalledString = line.nextLine().split(",");
+            for (String val : numbersCalledString) {
+                numbersCalledList.add(Integer.parseInt(val));
+            }
+
+            // build a list containing each board (set of 2D Array)
+            List<int[][]> boards = new ArrayList<int[][]>();
+            while (line.hasNextLine()) {
+                line.nextLine(); // skip next line
+                int[][] board = new int[5][5];
+                for (int boardRow = 0; boardRow < 5; boardRow++) {
+                    // collect and parse data
+                    String[] data = line.nextLine().trim().split("\\s+");
+                    // build matrix
+                    for (int boardCol = 0; boardCol < 5; boardCol++) { ////////// maybe don't need to put in each item.  Also, something broken here...
+                        board[boardRow][boardCol] = Integer.parseInt(data[boardCol]);
+                    }
+                }
+                boards.add(board);
+            }
+            line.close();
+
+            // submit numbers in order & update data for each board until first card's Bingo
+            int sizeBoards = boards.size();
+            List BoardsWithBingo = new ArrayList();
+            int[][] boardLock = new int[5][5];
+            int lastNumCalled = 100;
+            int bingoCard = 1000;
+            for (int numbercalled : numbersCalledList) {
+                for (int board = 0; board < sizeBoards; board++) {
+                    for (int row = 0; row < 5; row++) {
+                        for (int col = 0; col < 5; col++) {
+                            if (boards.get(board)[row][col] == numbercalled) {
+                                boards.get(board)[row][col] += 100; // add 100 to called number on cards
+                                bingoCard = bingoCheck(boards, BoardsWithBingo); // check each board if a new bing card
+                                if (bingoCard < 1000) { // 1000 set in support function as "no new bingo found"
+                                    BoardsWithBingo.add(bingoCard);
+                                    lastNumCalled = numbercalled;
+                                    for (int rowLock = 0; rowLock < 5; rowLock++) {
+                                        boardLock[rowLock] = boards.get(bingoCard)[rowLock].clone();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // with last Bingo card, perform calculation and output result
+            int unmarkedSum = 0;
+            for (int row = 0; row < 5; row++) {
+                for (int col = 0; col < 5; col++) {
+                    if (boardLock[row][col] < 100) {
+                        unmarkedSum += boardLock[row][col];
+                    }
+                }
+            }
+            System.out.println(unmarkedSum * lastNumCalled);
+
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+
+    /*
+    Check card for new Bingo card
+     */
+    private static int bingoCheck(List<int[][]> boards, List BoardsWithBingo) {
+        int sizeBoards = boards.size();
+        for (int board = 0; board < sizeBoards; board++) {
+            if ((bingoCheckRow(boards, board) < 5 || bingoCheckCol(boards, board) < 5) && !BoardsWithBingo.contains(board)) {return board;}
+        }
+        return 1000;  // no new bingo found
+    }
+
+    /*
+    Check row for Bingo
+     */
+    private static int bingoCheckRow(List<int[][]> boards, int board) {
+        for (int row = 0; row < 5; row++) {
+            if (boards.get(board)[row][0] >= 100 && boards.get(board)[row][1] >= 100
+                    && boards.get(board)[row][2] >= 100 && boards.get(board)[row][3] >= 100
+                    && boards.get(board)[row][4] >= 100) {
+                return row;
+            }
+        }
+        return 5; // no row found
+    }
+
+    /*
+    Check column for Bingo
+     */
+    private static int bingoCheckCol(List<int[][]> boards, int board) {
+        for (int col = 0; col < 5; col++) {
+            if (boards.get(board)[0][col] >= 100 && boards.get(board)[1][col] >= 100
+                    && boards.get(board)[2][col] >= 100 && boards.get(board)[3][col] >= 100
+                    && boards.get(board)[4][col] >= 100) {
+                return col;
+            }
+        }
+        return 5; // no col found
+    }
+}

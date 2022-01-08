@@ -1,0 +1,47 @@
+package com.company;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
+public class Main {
+
+    public static void main(String[] args) {
+        try {
+            File myObj = new File(
+                    "/home/bubba/Desktop/AdventOfCode/src/com/company/Day2.in");
+            Scanner line = new Scanner(myObj);
+
+            long horizontal = 0;
+            long vertical = 0;
+            long aim = 0;
+
+            while (line.hasNextLine()) {
+                String data = line.nextLine();
+
+                // note the direction & collect the value
+                String instruction[] = data.split(" ");
+
+                // store totals
+                switch (instruction[0]) {
+                    case "forward" : horizontal += Integer.parseInt(instruction[1]);
+                        vertical += aim * Integer.parseInt(instruction[1]);
+                        if (vertical < 0) {vertical = 0;} // make sure sub doesn't come out of water
+                        break;
+                    case "down" : aim += Integer.parseInt(instruction[1]);
+                        break;
+                    case "up" : aim -= Integer.parseInt(instruction[1]);
+                        break;
+                }
+            }
+            line.close();
+
+            // multiply directions together and output result
+            System.out.println(horizontal * vertical);
+
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+}
